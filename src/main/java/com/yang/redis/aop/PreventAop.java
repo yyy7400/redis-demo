@@ -1,9 +1,8 @@
 package com.yang.redis.aop;
 
 import com.alibaba.fastjson.JSON;
-import com.yang.redis.RedisUtil;
+import com.yang.redis.utils.RedisUtil;
 import common.BusinessException;
-import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -76,6 +75,7 @@ public class PreventAop {
 
     /**
      * 默认处理方式
+     *
      * @param requestStr
      * @param prevent
      * @param methodFullName
@@ -87,7 +87,7 @@ public class PreventAop {
 
         String key = methodFullName + base64Str;
         String resp = (String) redisUtil.get(key);
-        if(StringUtils.isEmpty(resp)) {
+        if (StringUtils.isEmpty(resp)) {
             redisUtil.set(key, requestStr, expire);
         } else {
             String message = !StringUtils.isEmpty(prevent.message()) ? prevent.message() : expire + "秒内不允许重复请求";
@@ -97,12 +97,13 @@ public class PreventAop {
 
     /**
      * 对象转换为base64字符串
+     *
      * @param obj
      * @return
      * @throws Exception
      */
     private String toBase64String(String obj) throws Exception {
-        if(StringUtils.isEmpty(obj)) {
+        if (StringUtils.isEmpty(obj)) {
             return null;
         }
 

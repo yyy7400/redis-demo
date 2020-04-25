@@ -1,7 +1,7 @@
 package com.yang.redis.controller;
 
-import com.yang.redis.RedisUtil;
 import com.yang.redis.entity.User;
+import com.yang.redis.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,20 +42,20 @@ public class RedisController {
         //return "kkk";
 
         Map<String, String> map = new HashMap<>();
-        for(int i = 0; i < 10000; i++) {
-            map.put(i+"", "kkk");
+        for (int i = 0; i < 10000; i++) {
+            map.put(i + "", "kkk");
         }
 
         long t1 = System.currentTimeMillis();
-        for(int i = 0; i < Integer.valueOf(key); i++) {
+        for (int i = 0; i < Integer.valueOf(key); i++) {
             //map.get("123");
             redisUtil.get("13");
             //redisUtil.set("1", "jjj");
         }
         long t2 = System.currentTimeMillis();
-        System.out.println(t2 -t1);
+        System.out.println(t2 - t1);
 
-        return (t2 -t1);
+        return (t2 - t1);
         //return redisUtil.get(key);
     }
 
@@ -65,7 +65,7 @@ public class RedisController {
     }
 
     @PostMapping("/redis/post")
-    public Integer post(@RequestBody List<Integer> list){
+    public Integer post(@RequestBody List<Integer> list) {
         return list.size();
     }
 }

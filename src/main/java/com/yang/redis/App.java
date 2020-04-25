@@ -1,5 +1,10 @@
 package com.yang.redis;
 
+import com.google.common.collect.Interner;
+import com.google.common.hash.BloomFilter;
+import com.google.common.hash.Funnels;
+import com.yang.redis.utils.BloomFilterHelper;
+import com.yang.redis.utils.RedisUtil;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
@@ -40,29 +45,63 @@ public class App {
 
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
-        get();
+        //get();
+        bloomFilter();
+    }
+
+    private static int total = 1000;
+    private static BloomFilter<Integer> bf = BloomFilter.create(Funnels.integerFunnel(), total);
+    private static BloomFilterHelper<Integer> bloomFilterHelper = new BloomFilterHelper<>(Funnels.integerFunnel(),total, 0.03 );
+
+    public static void bloomFilter() {
+        // 初始化1000000条数据到过滤器中
+        for (int i = 0; i < total; i++) {
+            //bf.put(i);
+            app.redisUtil.addByBloomFilter(bloomFilterHelper, String.valueOf(i), i);
+        }
+
+        // 匹配已在过滤器中的值，是否有匹配不上的
+        for (int i = 0; i < total; i++) {
+            //if (!bf.mightContain(i)) {
+            if(!app.redisUtil.includeByBloomFilter(bloomFilterHelper, String.valueOf(i), i)) {
+                System.out.println("有坏人逃脱了~~~");
+            }
+        }
+
+        // 匹配不在过滤器中的10000个值，有多少匹配出来
+        int count = 0;
+        for (int i = total; i < total + 10000; i++) {
+            //if (bf.mightContain(i)) {
+           if(app.redisUtil.includeByBloomFilter(bloomFilterHelper, String.valueOf(i), i)) {
+                count++;
+            }
+        }
+        System.out.println("误伤的数量：" + count);
+
+
 
     }
 
-    public static void get(){
+    public static void get() {
 
         app.redisUtil.set("123", "kkk");
 
-        while (true){
+        while (true) {
             long t1 = System.currentTimeMillis();
-            for(int i = 0; i < 10000; i++) {
+            for (int i = 0; i < 10000; i++) {
                 //map.get("123");
                 app.redisUtil.get("123");
                 //redisUtil.set("1", "jjj");
             }
             long t2 = System.currentTimeMillis();
-            System.out.println(t2 -t1);
+            System.out.println(t2 - t1);
         }
 
     }
 
     /**
      * http重定向到https
+     *
      * @return
      */
     @Bean
